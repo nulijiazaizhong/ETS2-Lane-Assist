@@ -1,0 +1,35 @@
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'  # 每 2 小时运行一次（UTC 时间）
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0  # 获取完整 Git 历史
+
+      - name: Set Up Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add Upstream and Fetch
+        run: |
+          git remote add upstream https://github.com/ETS2LA/Euro-Truck-Simulator-2-Lane-Assist.git || true
+          git fetch upstream --prune  # 获取上游的所有更新并删除已删除的分支
+
+      - name: Sync All Branches
+        run: |
+          for branch in $(git branch -r | grep upstream/ | sed 's/upstream\///'); do
+            echo "Syncing branch: $branch"
+            git checkout $branch || git checkout -b $branch upstream/$branch
+            git merge --ff-only upstream/$branch || echo "Merge conflict in $branch, skipping merge"
+            git push origin $branch
+          done
