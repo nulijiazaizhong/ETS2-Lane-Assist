@@ -22,7 +22,7 @@ jobs:
 
       - name: Add Upstream and Fetch
         run: |
-          git remote add upstream https://github.com/original-owner/repo-name.git || true
+          git remote add upstream https://github.com/ETS2LA/Euro-Truck-Simulator-2-Lane-Assist || true
           git fetch upstream --prune  # 获取上游的所有更新并删除已删除的分支
 
       - name: Sync All Branches
